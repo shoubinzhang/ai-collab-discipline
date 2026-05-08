@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Local secrets — never commit
+.env
+.env.local
+*.local.json
+
+# Local AI session artifacts (not for sharing)
+.claude/projects/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Demo-specific: real session logs are personal
+docs/session_logs/*.md
+!docs/session_logs/README.md
+!docs/session_logs/_template.md
+!docs/session_logs/2026-05-08-sample.md

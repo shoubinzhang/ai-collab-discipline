@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "L2 Harness 层 — Claude Code 协作配置。Hook 把 L1 协议层的纪律变成不可跳过的自动触发。",
+
+  "permissions": {
+    "_comment_permissions": "白名单只放低风险的只读 / 本地操作。改 DB / 推 git 这种必须留给用户确认。",
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(python scripts/ci/*:*)",
+      "Bash(python3 scripts/ci/*:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)"
+    ]
+  },
+
+  "hooks": {
+    "_comment_hooks": "三类核心 hook：SessionStart 强制启动协议；PreToolUse 拦截高危操作；Stop 检查未提交改动。",
+
+    "SessionStart": [
+      {
+        "_comment": "新会话启动时自动加载上下文。让 AI 不能跳过启动协议。",
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🔒 SessionStart hook fired. AI must follow CLAUDE.md startup protocol:' && echo '  1. Read CLAUDE.md' && echo '  2. Read latest docs/session_logs/' && echo '  3. Read docs/lessons.md' && echo '  4. Read docs/specs/README.md' && echo '  5. Re-state task understanding in Chinese before coding'"
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "_comment": "Edit / Write 之前检查目标文件行数。超硬上限拒绝；超警戒线警告。",
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/ci/check_file_size_limits.py --pretool || true"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "_comment": "AI 每轮结束时检查是否有未提交改动。避免 AI 改完忘 commit。",
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-hook-git-check.sh"
+          }
+        ]
+      }
+    ]
+  },
+
+  "model": "claude-opus-4-7",
+
+  "_comment_model": "默认用 Opus 处理纪律密集任务（需要严格按 6 层协议执行）。轻量任务可在 /model 命令切到 Sonnet 加速。"
+}
