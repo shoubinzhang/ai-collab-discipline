@@ -62,7 +62,7 @@
 |---------|---------|---------|-------|----------|-------|
 | draft | submit | submitted | 创建者 | 否 | 是 |
 | submitted | review | reviewing | reviewer | 否 | 是 |
-| reviewing | approve | approved | manager | 是（21 CFR Part 11） | 否 |
+| reviewing | approve | approved | manager | 是（audit-trail compliance） | 否 |
 | reviewing | reject | draft | manager | 否 | 是 |
 | approved | archive | archived | system | 否 | 否 |
 
@@ -86,36 +86,36 @@
 
 ## 示例：一份完整 spec 长什么样
 
-> 下面是一份示意性的 `complaint_flow.md`（脱敏的占位例子）
+> 下面是一份示意性的 `incident_flow.md`（脱敏的占位例子）
 
 ```markdown
-# 客诉处理流程
+# 事件响应流程
 
 ## 目的
-定义客户投诉从接收到关闭的完整状态流转，含跨部门审批、电子签名要求。
+定义生产事件从接收到关闭的完整状态流转，含跨团队协作、操作审计要求。
 
 ## 状态机
 
 | 当前状态 | 允许动作 | 下一状态 | 谁能做 | 需要签名？ | 可逆？ |
 |---------|---------|---------|-------|----------|-------|
-| received | assign | investigating | QA manager | 否 | 是 |
+| received | assign | investigating | ops manager | 否 | 是 |
 | investigating | submit_summary | reviewing | investigator | 是 | 否 |
-| reviewing | approve | closed | QA manager | 是 | 否 |
-| reviewing | return_for_more_info | investigating | QA manager | 否 | 是 |
-| closed | reopen | reviewing | QA manager | 是 | 否 |
+| reviewing | approve | closed | ops manager | 是 | 否 |
+| reviewing | return_for_more_info | investigating | ops manager | 否 | 是 |
+| closed | reopen | reviewing | ops manager | 是 | 否 |
 
 ## 关键规则
 
-1. 严重等级 = "Critical" 的投诉必须 24 小时内 assign
+1. 严重等级 = "Critical" 的事件必须 24 小时内 assign
 2. investigation_summary 字段非空才允许 submit_summary
-3. closed 状态需双签：investigator + QA manager
+3. closed 状态需双签：investigator + ops manager
 4. reopen 操作必须填写 reopen_reason
-5. 跨产品线投诉需 cc 给所有产品线的 QA
+5. 跨团队事件需 cc 给所有相关团队的 ops
 
 ## 例外情况
 
-- 产品退回类投诉：跳过 investigating，直接进 reviewing（产品线判断）
-- 来自监管机构的投诉：必须升级到 director 级别审批
+- 自动恢复类事件：跳过 investigating，直接进 reviewing（监控系统判断）
+- 来自客户合同 SLA 的事件：必须升级到 director 级别审批
 
 ## 字段约定
 
@@ -126,9 +126,9 @@
 
 ## 决策历史
 
-- 2026-01-15：用户确认"严重等级 Critical 必须 24h assign"，来源监管要求 ISO 13485
+- 2026-01-15：用户确认"严重等级 Critical 必须 24h assign"，来源 SLA 合同约定
 - 2026-02-03：增加 reopen_reason 必填规则，避免无理由 reopen 留下隐患
-- 2026-03-20：跨产品线 cc 规则确认，来源 QA manager 反馈漏通知
+- 2026-03-20：跨团队 cc 规则确认，来源 ops manager 反馈漏通知
 ```
 
 ---
@@ -147,8 +147,8 @@ Spec 是**活文档**，会随业务演进：
 
 每个 spec 独立文件，避免一次性加载全部：
 
-- 做客诉相关 → 只读 `complaint_flow.md`
-- 做 QC 相关 → 只读 `qc_flow.md`
+- 做事件相关 → 只读 `incident_flow.md`
+- 做发布相关 → 只读 `release_flow.md`
 - 做删除操作 → 只读 `delete_strategy.md`
 
 Spec 文件保持**小而精**（单个文件 < 10 KB），便于 AI prompt caching。
