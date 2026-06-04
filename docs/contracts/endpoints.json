@@ -1,0 +1,9 @@
+[
+  {
+    "id": "health_check",
+    "path": "/api/health",
+    "method": "GET",
+    "expected_status": 200,
+    "version": "v1"
+  }
+]

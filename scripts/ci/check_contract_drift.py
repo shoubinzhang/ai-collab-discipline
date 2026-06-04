@@ -110,21 +110,21 @@ def load_endpoint_config(contracts_dir: Path) -> list[dict]:
         print(f"❌ 配置文件不存在：{cfg}", file=sys.stderr)
         print("   运行 --bootstrap --endpoint /your/path 生成模板", file=sys.stderr)
         return []
-    return json.loads(cfg.read_text())
+    return json.loads(cfg.read_text(encoding="utf-8"))
 
 
 def load_baseline(contracts_dir: Path, endpoint_id: str) -> dict | None:
     f = contracts_dir / "baselines" / f"{endpoint_id}.example.json"
     if not f.exists():
         return None
-    return json.loads(f.read_text())
+    return json.loads(f.read_text(encoding="utf-8"))
 
 
 def load_schema(contracts_dir: Path, endpoint_id: str, version: str = "v1") -> dict | None:
     f = contracts_dir / "schemas" / version / f"{endpoint_id}.schema.json"
     if not f.exists():
         return None
-    return json.loads(f.read_text())
+    return json.loads(f.read_text(encoding="utf-8"))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -320,6 +320,14 @@ def cmd_bootstrap(contracts_dir: Path, endpoint_id: str) -> int:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows 终端默认 GBK，print 里的 emoji / 中文会 UnicodeEncodeError；
+    # CI（Linux）默认 UTF-8 不受影响。统一切 UTF-8，保证本地 + CI 都能跑。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
     parser = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--offline", action="store_true",

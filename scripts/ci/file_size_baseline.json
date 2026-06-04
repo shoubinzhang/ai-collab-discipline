@@ -1,0 +1,4 @@
+{
+  "_comment": "Empty baseline = zero-tolerance: any hard violation is treated as NEW and fails CI. This demo repo currently has 0 hard violations. As you adopt the framework, run --report to seed real grandfathered entries here.",
+  "violations": []
+}

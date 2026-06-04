@@ -1,0 +1,36 @@
+name: Discipline Gates (L4)
+
+# 让这套纪律框架 **自己执行自己声明的红线**——
+# 不再是 README 里写写的"CI 门禁层",而是每次 push / PR 真跑、能 fail。
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  file-size-gate:
+    name: 文件规模红线 (L1/L4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 全仓扫描报告（可见性，恒 exit 0）
+        run: python scripts/ci/check_file_size_limits.py --report
+      - name: 门禁 — 对比基线，出现新增 hard 违规即 fail
+        run: python scripts/ci/check_file_size_limits.py --vs-baseline scripts/ci/file_size_baseline.json
+
+  contract-drift-gate:
+    name: API 契约漂移 (L4/L5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 安装 jsonschema（真做 schema 校验，非降级字段集）
+        run: python -m pip install --quiet jsonschema
+      - name: 离线契约一致性检查（baseline 是否符合 schema）
+        run: python scripts/ci/check_contract_drift.py --offline

@@ -1,0 +1,6 @@
+{
+  "_comment": "示例契约 baseline。真实接入时把真实 API 响应粘进来；之后任何字段增删 / 改名 / 类型变化都会被 CI 检出。",
+  "status": "ok",
+  "service": "lims",
+  "version": "2.18.0"
+}

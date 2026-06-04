@@ -317,6 +317,14 @@ def cmd_vs_baseline(project_root: Path, baseline_file: Path) -> int:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows 终端默认 GBK，print 里的 emoji / 中文会 UnicodeEncodeError；
+    # CI（Linux）默认 UTF-8 不受影响。统一切 UTF-8，保证本地 + CI 都能跑。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
     parser = argparse.ArgumentParser(
         description="文件规模红线检查（CLAUDE.md 定义的硬上限 / 警戒线）"
     )
